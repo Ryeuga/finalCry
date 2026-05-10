@@ -43,8 +43,15 @@ app.get('/', (req, res) => {
 });
 
 // WebRTC configuration endpoint
-app.get('/api/rtc-config', (req, res) => {
-  res.json({ config: getRTCConfiguration() });
+app.get('/api/rtc-config', async (req, res) => {
+  try {
+    const response = await fetch("https://gradnet.metered.live/api/v1/turn/credentials?apiKey=80c328f8880136ec24922d118e3242fac3ef");
+    const iceServers = await response.json();
+    res.json({ config: { iceServers } });
+  } catch (error) {
+    logger.error(`Error fetching TURN credentials: ${error}`);
+    res.json({ config: getRTCConfiguration() }); // fallback to default/env STUN
+  }
 });
 
 // Auth routes
