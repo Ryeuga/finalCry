@@ -6,6 +6,7 @@ const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || `http://${wind
 export const Landing = () => {
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
+    const [interestsInput, setInterestsInput] = useState("");
     const [step, setStep] = useState<'email' | 'name'>('email');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -14,6 +15,27 @@ export const Landing = () => {
     const [localVideoTrack, setlocalVideoTrack] = useState<MediaStreamTrack | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [showFriends, setShowFriends] = useState(false);
+    const [friendsList, setFriendsList] = useState<any[]>([]);
+
+    const fetchFriends = async () => {
+        if (!verifiedEmail) return;
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/auth/friends?email=${encodeURIComponent(verifiedEmail)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setFriendsList(data.friends || []);
+            }
+        } catch (err) {
+            console.error("Failed to fetch friends", err);
+        }
+    };
+
+    useEffect(() => {
+        if (showFriends) {
+            fetchFriends();
+        }
+    }, [showFriends]);
 
 useEffect(() => {
     document.body.className = theme === 'dark' ? 'dark-mode' : '';
@@ -287,6 +309,16 @@ useEffect(() => {
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="Your name"
                                         className="input-field"
+                                    />
+                                    <label className="field-label" style={{marginTop: '10px'}}>
+                                        Interests (comma separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={interestsInput}
+                                        onChange={(e) => setInterestsInput(e.target.value)}
+                                        placeholder="e.g. coding, music, gaming"
+                                        className="input-field"
                                         onKeyPress={(e) => {
                                             if (e.key === 'Enter' && name.trim()) {
                                                 handleStartChatting();
@@ -298,6 +330,7 @@ useEffect(() => {
                                             onClick={() => {
                                                 setStep('email');
                                                 setError('');
+                                                setShowFriends(false);
                                             }}
                                             className="btn secondary"
                                         >
@@ -311,6 +344,28 @@ useEffect(() => {
                                             Start Chatting
                                         </button>
                                     </div>
+                                    <div className="actions-row" style={{marginTop: '16px'}}>
+                                        <button onClick={() => setShowFriends(!showFriends)} className="btn ghost" style={{flex: 1}}>
+                                            {showFriends ? 'Hide Friends' : 'My Friends'}
+                                        </button>
+                                    </div>
+                                    {showFriends && (
+                                        <div style={{marginTop: '16px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px'}}>
+                                            <h4 style={{marginBottom: '8px', color: 'var(--text-primary)'}}>Friends List</h4>
+                                            {friendsList.length === 0 ? (
+                                                <p style={{fontSize: '14px', color: 'var(--text-secondary)'}}>No friends yet. Start chatting to make some!</p>
+                                            ) : (
+                                                <ul style={{listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                    {friendsList.map((f, i) => (
+                                                        <li key={i} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', alignItems: 'center'}}>
+                                                            <span style={{fontWeight: 500, color: 'var(--text-primary)'}}>{f.name}</span>
+                                                            <span style={{color: 'var(--text-secondary)', fontSize: '12px'}}>{f.email}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -349,6 +404,7 @@ useEffect(() => {
         <Room 
             name={name} 
             email={verifiedEmail || ''} 
+            interests={interestsInput.split(',').map(i => i.trim()).filter(i => i)}
             localAudioTrack={localAudioTrack} 
             localVideoTrack={localVideoTrack}
             onLeave={handleLeaveRoom}

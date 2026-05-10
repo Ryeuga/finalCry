@@ -649,3 +649,7 @@
 {"level":"info","message":"User verified for test@newtonschool.edu (college email domain validated)","service":"omegle-backend","timestamp":"2026-05-10 14:24:05"}
 {"level":"info","message":"User connected: TQU8SJZOIY2l3GE3AAAB","service":"omegle-backend","timestamp":"2026-05-10 14:24:08"}
 {"level":"info","message":"User User (test@newtonschool.edu) (TQU8SJZOIY2l3GE3AAAB) joined","service":"omegle-backend","timestamp":"2026-05-10 14:24:08"}
+{"level":"info","message":"User disconnected: TQU8SJZOIY2l3GE3AAAB","service":"omegle-backend","timestamp":"2026-05-10 15:22:59"}
+{"level":"info","message":"User TQU8SJZOIY2l3GE3AAAB removed","service":"omegle-backend","timestamp":"2026-05-10 15:22:59"}
+{"level":"warn","message":"⚠️  MongoDB disconnected","service":"omegle-backend","timestamp":"2026-05-10 16:14:11"}
+{"level":"warn","message":"⚠️  MongoDB disconnected","service":"omegle-backend","timestamp":"2026-05-10 16:39:42"}
