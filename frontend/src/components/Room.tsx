@@ -47,6 +47,8 @@ export const Room = ({
     const [friendRequestSent, setFriendRequestSent] = useState(false);
     const [rtcConfig, setRtcConfig] = useState<RTCConfiguration | undefined>();
     const rtcConfigRef = useRef<RTCConfiguration | undefined>();
+    const [isSelfEnlarged, setIsSelfEnlarged] = useState(false);
+    const [isChatOpen, setIsChatOpen] = useState(true);
 
     useEffect(() => {
         fetch(`${URL}/api/rtc-config`)
@@ -403,41 +405,31 @@ export const Room = ({
 
     return (
         <div className={`room-container ${roomStateClasses}`}>
-            <div className="background-glow" />
-            <div className={`room-shell ${roomStateClasses}`}>
-                <div className="room-header">
-                    <div>
-                        <p className="tagline">Signed in as {name}</p>
-                        <h2>NST Network</h2>
+            <div className="room-content">
+                <div className="video-section">
+                    {/* Top info */}
+                    <div className="top-overlay">
+                        <p className="top-username">Signed in as {name}</p>
+                        <div className="top-points">
+                            <span className="golden-bullet"></span>
+                            Points: 128 [to be added]
+                        </div>
                     </div>
-                    <span className={`status-pill ${lobby ? 'waiting' : 'connected'}`}>
-                        {'Points: 128 [to be added]'}
-                    </span>
-                </div>
 
-                <div className="room-layout" style={{ position: 'relative' }}>
-                    {friendRequestReceived && !friendAdded && (
-                        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.8)', padding: '12px 20px', borderRadius: '8px', zIndex: 100, display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid var(--accent-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)'}}>
-                            <span style={{color: 'white'}}>{friendRequestReceived.senderName} sent you a friend request!</span>
-                            <button onClick={handleAcceptFriendRequest} className="btn primary" style={{padding: '6px 12px', minWidth: 'auto', height: 'auto', fontSize: '14px'}}>Accept</button>
-                            <button onClick={() => setFriendRequestReceived(null)} className="btn ghost" style={{padding: '6px 12px', minWidth: 'auto', height: 'auto', fontSize: '14px'}}>Decline</button>
-                        </div>
-                    )}
-                    <div className="video-stack">
-                        <div className="video-card remote-card">
-                            <div className="video-meta">
-                                <h3>{lobby ? 'Searching for a match…' : 'Stranger'}</h3>
-                                <span>{lobby ? 'Hang tight, we are pairing you.' : 'You are connected'}</span>
+                    {/* Videos */}
+                    <div className="video-fullscreen-container">
+                        {friendRequestReceived && !friendAdded && (
+                            <div className="friend-request-overlay">
+                                <span style={{color: 'white'}}>{friendRequestReceived.senderName} sent you a friend request!</span>
+                                <button onClick={handleAcceptFriendRequest} className="btn primary btn-sm">Accept</button>
+                                <button onClick={() => setFriendRequestReceived(null)} className="btn ghost btn-sm">Decline</button>
                             </div>
-                            <video 
-                                autoPlay 
-                                playsInline
-                                ref={remoteVideoRef}
-                                className="video-frame remote-frame"
-                                style={{ filter: remoteVideoFilter }}
-                            />
-                        </div>
-                        <div className="video-card self-card">
+                        )}
+                        
+                        <div 
+                            className={`video-card ${isSelfEnlarged ? 'fullscreen-video' : 'pip-video'}`}
+                            onClick={() => !isSelfEnlarged && setIsSelfEnlarged(true)}
+                        >
                             <div className="video-meta">
                                 <h3>You</h3>
                                 <span>{lobby ? 'Camera preview' : 'Live now'}</span>
@@ -446,100 +438,122 @@ export const Room = ({
                                 autoPlay
                                 playsInline
                                 ref={localVideoRef}
-                                className={`video-frame self-frame ${!isScreenSharing ? 'mirror' : ''}`}
+                                className={`video-frame ${!isScreenSharing ? 'mirror' : ''}`}
                                 style={{ filter: videoFilter }}
                                 muted
                             />
                         </div>
-                    </div>
-                    <div className="chat-column">
-                        <div className="chat-panel">
-                            <div className="chat-header">
-                                <h4>Live chat</h4>
-                                
+
+                        <div 
+                            className={`video-card ${!isSelfEnlarged ? 'fullscreen-video' : 'pip-video'}`}
+                            onClick={() => isSelfEnlarged && setIsSelfEnlarged(false)}
+                        >
+                            <div className="video-meta">
+                                <h3>{lobby ? 'Searching for a match…' : 'Stranger'}</h3>
+                                <span>{lobby ? 'Hang tight, we are pairing you.' : 'You are connected'}</span>
                             </div>
-                            <div className="chat-messages">
-                                {messages.length === 0 && (
-                                    <p className="chat-empty">Keep chatting while the video stays live.</p>
-                                )}
-                                {messages.map(message => (
-                                    <div
-                                        key={message.id}
-                                        className={`chat-message ${message.sender === 'me' ? 'self' : 'peer'}`}
-                                    >
-                                        <span className="chat-author">{message.sender === 'me' ? 'You' : message.senderName}</span>
-                                        <p>{message.text}</p>
-                                    </div>
-                                ))}
-                                <div ref={chatBottomRef} />
-                            </div>
-                            <form className="chat-input-row" onSubmit={handleSendMessage}>
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    placeholder={lobby ? 'Chat unlocks once connected…' : 'Type a message'}
-                                    className="input-field"
-                                />
-                                <button
-                                    type="submit"
-                                    className="btn primary"
-                                    disabled={lobby || !chatInput.trim()}
-                                >
-                                    Send
-                                </button>
-                            </form>
-                        </div>
-                        <div className="controls chat-controls">
-                            <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-                                <button onClick={handleScreenShare} className="btn ghost" disabled={lobby} title="Share Screen">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'text-bottom'}}><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h10"/><path d="m9 18 3-3-3-3"/></svg>
-                                    {isScreenSharing ? 'Stop Share' : 'Share'}
-                                </button>
-                                <select 
-                                    className="btn ghost" 
-                                    style={{padding: '8px', border: '1px solid rgba(255,255,255,0.2)', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white'}}
-                                    value={videoFilter} 
-                                    onChange={(e) => setVideoFilter(e.target.value)}
-                                >
-                                    <option value="">Filter: None</option>
-                                    <option value="grayscale(100%)">B&W</option>
-                                    <option value="sepia(100%)">Sepia</option>
-                                    <option value="blur(4px)">Blur</option>
-                                </select>
-                            </div>
-                            <div style={{display: 'flex', gap: '8px'}}>
-                                <button 
-                                    onClick={handleSendFriendRequest}
-                                    className="btn ghost"
-                                    disabled={lobby || friendAdded || friendRequestSent}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'text-bottom'}}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                                    {friendAdded ? 'Friends ✓' : friendRequestSent ? 'Request Sent' : 'Add Friend'}
-                                </button>
-                                <button 
-                                    onClick={handleReport}
-                                    className="btn ghost"
-                                    disabled={lobby}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'text-bottom'}}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
-                                    Report
-                                </button>
-                            <button 
-                                onClick={lobby ? handleCancelSearch : handleDisconnect}
-                                className={`btn ${lobby ? 'secondary' : 'danger'}`}
-                            >
-                                {lobby ? 'Cancel Search' : (
-                                    <>
-                                        Skip
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft: '6px', verticalAlign: 'text-bottom'}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                    </>
-                                )}
-                            </button>
-                            </div>
+                            <video 
+                                autoPlay 
+                                playsInline
+                                ref={remoteVideoRef}
+                                className="video-frame"
+                                style={{ filter: remoteVideoFilter }}
+                            />
                         </div>
                     </div>
+
+
+
+            {/* Bottom Feature Bar */}
+            <div className="transparent-feature-bar">
+                <button onClick={handleScreenShare} className="btn ghost feature-btn" disabled={lobby} title="Share Screen">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h10"/><path d="m9 18 3-3-3-3"/></svg>
+                    <span>{isScreenSharing ? 'Stop Share' : 'Share'}</span>
+                </button>
+                <div className="feature-select-wrapper">
+                    <select 
+                        className="feature-select" 
+                        value={videoFilter} 
+                        onChange={(e) => setVideoFilter(e.target.value)}
+                    >
+                        <option value="">Filter: None</option>
+                        <option value="grayscale(100%)">B&W</option>
+                        <option value="sepia(100%)">Sepia</option>
+                        <option value="blur(4px)">Blur</option>
+                    </select>
                 </div>
+                <button 
+                    onClick={handleSendFriendRequest}
+                    className="btn ghost feature-btn"
+                    disabled={lobby || friendAdded || friendRequestSent}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                    <span>{friendAdded ? 'Friends ✓' : friendRequestSent ? 'Request Sent' : 'Add Friend'}</span>
+                </button>
+                <button 
+                    onClick={handleReport}
+                    className="btn ghost feature-btn"
+                    disabled={lobby}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                    <span>Report</span>
+                </button>
+                <button 
+                    onClick={lobby ? handleCancelSearch : handleDisconnect}
+                    className={`btn feature-btn ${lobby ? 'secondary' : 'danger'}`}
+                >
+                    {lobby ? 'Cancel Search' : (
+                        <>
+                            <span>Skip</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </>
+                    )}
+                </button>
+            </div>
+            </div>
+
+            {/* Chat Section */}
+            <div className={`chat-section ${isChatOpen ? 'expanded' : 'retracted'}`}>
+                <button className="chat-slide-btn" onClick={() => setIsChatOpen(!isChatOpen)}>
+                    <svg className={`chevron ${!isChatOpen ? 'flipped' : ''}`} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <div className="chat-content">
+                    <div className="chat-header">
+                        <h4>Live chat</h4>
+                    </div>
+                    <div className="chat-messages">
+                        {messages.length === 0 && (
+                            <p className="chat-empty">Keep chatting while the video stays live.</p>
+                        )}
+                        {messages.map(message => (
+                            <div
+                                key={message.id}
+                                className={`chat-message ${message.sender === 'me' ? 'self' : 'peer'}`}
+                            >
+                                <span className="chat-author">{message.sender === 'me' ? 'You' : message.senderName}</span>
+                                <p>{message.text}</p>
+                            </div>
+                        ))}
+                        <div ref={chatBottomRef} />
+                    </div>
+                    <form className="chat-input-row" onSubmit={handleSendMessage}>
+                        <input
+                            type="text"
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            placeholder={lobby ? 'Chat unlocks once connected…' : 'Type a message'}
+                            className="input-field"
+                        />
+                        <button
+                            type="submit"
+                            className="btn primary"
+                            disabled={lobby || !chatInput.trim()}
+                        >
+                            Send
+                        </button>
+                    </form>
+                </div>
+            </div>
             </div>
         </div>
     )
