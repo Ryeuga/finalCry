@@ -214,6 +214,9 @@ body.room-active { height: 100vh; overflow: hidden; }
   border: 1px solid var(--border-subtle);
   transition: background-color 0.3s, border-color 0.3s;
 }
+.mirror {
+  transform: scaleX(-1);
+}
 .preview-video { width: 100%; border-radius: 12px; overflow: hidden; }
 .preview-label { font-size: 0.9rem; color: var(--text-muted); }
 
