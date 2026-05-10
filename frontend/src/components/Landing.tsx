@@ -14,7 +14,7 @@ export const Landing = () => {
     const [localAudioTrack, setLocalAudioTrack] = useState<MediaStreamTrack | null>(null);
     const [localVideoTrack, setlocalVideoTrack] = useState<MediaStreamTrack | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const [showFriends, setShowFriends] = useState(false);
     const [friendsList, setFriendsList] = useState<any[]>([]);
 

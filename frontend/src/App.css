@@ -100,19 +100,21 @@ body.room-active { height: 100vh; overflow: hidden; }
 }
 
 .landing-nav {
-  width: 100%;
+  width: calc(100% + clamp(32px, 10vw, 128px));
+  margin-left: calc(-1 * clamp(16px, 5vw, 64px));
+  margin-top: calc(-1 * clamp(24px, 4vw, 48px));
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
-  border-radius: 12px;
-  background: var(--bg-card);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-subtle);
-  transition: background-color 0.3s, border-color 0.3s;
+  justify-content: flex-start;
+  padding: 12px 32px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.brand { display: flex; align-items: center; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 16px; }
 .logo-mark {
   width: 48px; height: 48px;
   border-radius: 10px;
@@ -123,27 +125,24 @@ body.room-active { height: 100vh; overflow: hidden; }
   letter-spacing: 0.04em;
   transition: background-color 0.3s, color 0.3s;
 }
-.brand-label { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-body); }
-.brand-sub { font-size: 0.85rem; color: var(--text-muted); }
+.brand-label { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-body); }
+.brand-sub { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
 
 /* Al Pacino Style Profile Crop */
 .al-pacino-container {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
+  width: 180px;
+  height: 56px;
+  border-radius: 6px;
   overflow: hidden;
   background-color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #333;
 }
 
 .al-pacino-img {
-  width: 170%; /* Make the image larger to zoom in */
-  height: 170%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: 25% 45%; /* Shift to focus exactly on the face in the top left quadrant */
+  object-position: center 30%;
 }
 
 .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.95rem; }
