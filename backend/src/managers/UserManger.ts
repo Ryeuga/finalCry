@@ -6,6 +6,7 @@ import { logger } from "../config/logger";
 export interface User {
     socket: Socket;
     name: string;
+    email: string;
     interests?: string[];
 }
 
@@ -20,7 +21,7 @@ export class UserManager {
         this.roomManager = new RoomManager();
     }
 
-    async addUser(name: string, socket: Socket, interests?: string[]) {
+    async addUser(name: string, email: string, socket: Socket, interests?: string[]) {
         // Check if user is banned
         try {
             const existingUser = await UserModel.findOne({ socketId: socket.id });
@@ -35,6 +36,7 @@ export class UserManager {
 
         const user: User = {
             name,
+            email,
             socket,
             interests: interests || []
         };
@@ -45,7 +47,7 @@ export class UserManager {
         // Save/update user in database
         try {
             await UserModel.findOneAndUpdate(
-                { socketId: socket.id },
+                { email: email.toLowerCase() },
                 {
                     socketId: socket.id,
                     name,
@@ -104,35 +106,52 @@ export class UserManager {
             return;
         }
 
-        const id1 = this.queue.pop();
-        const id2 = this.queue.pop();
-        
-        if (!id1 || !id2) {
-            return;
+        let matched = false;
+
+        for (let i = 0; i < this.queue.length; i++) {
+            for (let j = i + 1; j < this.queue.length; j++) {
+                const user1 = this.users.find(x => x.socket.id === this.queue[i]);
+                const user2 = this.users.find(x => x.socket.id === this.queue[j]);
+
+                if (!user1 || !user2 || !user1.socket.connected || !user2.socket.connected) continue;
+
+                const hasSharedInterests = user1.interests?.some(interest => 
+                    user2.interests?.map(i => i.toLowerCase()).includes(interest.toLowerCase())
+                );
+
+                if (hasSharedInterests || !user1.interests?.length || !user2.interests?.length) {
+                    const id1 = this.queue[i];
+                    const id2 = this.queue[j];
+                    
+                    this.queue.splice(j, 1);
+                    this.queue.splice(i, 1);
+                    
+                    logger.info(`Matching users: ${user1.name} and ${user2.name}`);
+                    this.roomManager.createRoom(user1, user2);
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) break;
         }
 
-        const user1 = this.users.find(x => x.socket.id === id1);
-        const user2 = this.users.find(x => x.socket.id === id2);
-
-        if (!user1 || !user2) {
-            // Re-add to queue if user not found
-            if (user1) this.queue.push(id1);
-            if (user2) this.queue.push(id2);
-            return;
+        if (!matched && this.queue.length >= 2) {
+            const id1 = this.queue.pop();
+            const id2 = this.queue.pop();
+            if (id1 && id2) {
+                const user1 = this.users.find(x => x.socket.id === id1);
+                const user2 = this.users.find(x => x.socket.id === id2);
+                if (user1 && user2 && user1.socket.connected && user2.socket.connected) {
+                    logger.info(`Matching users randomly: ${user1.name} and ${user2.name}`);
+                    this.roomManager.createRoom(user1, user2);
+                    matched = true;
+                }
+            }
         }
 
-        // Check if users are still connected
-        if (!user1.socket.connected || !user2.socket.connected) {
-            if (user1.socket.connected) this.queue.push(id1);
-            if (user2.socket.connected) this.queue.push(id2);
-            return;
+        if (matched) {
+            this.clearQueue();
         }
-
-        logger.info(`Matching users: ${user1.name} and ${user2.name}`);
-        this.roomManager.createRoom(user1, user2);
-        
-        // Recursively clear queue to match more users
-        this.clearQueue();
     }
 
     initHandlers(socket: Socket) {
@@ -161,6 +180,38 @@ export class UserManager {
                 return;
             }
             this.roomManager.forwardChatMessage(resolvedRoomId, socket.id, message);
+        });
+
+        socket.on("video-filter", ({ roomId, filter }: { roomId?: string, filter: string }) => {
+            const resolvedRoomId = roomId || this.roomManager.getRoomBySocketId(socket.id);
+            if (!resolvedRoomId) return;
+            this.roomManager.forwardVideoFilter(resolvedRoomId, socket.id, filter);
+        });
+
+        socket.on("send-friend-request", ({ roomId }: { roomId?: string }) => {
+            const resolvedRoomId = roomId || this.roomManager.getRoomBySocketId(socket.id);
+            if (!resolvedRoomId) return;
+            this.roomManager.sendFriendRequest(resolvedRoomId, socket.id);
+        });
+
+        socket.on("accept-friend-request", async ({ senderEmail }: { senderEmail: string }) => {
+            const currentUser = await UserModel.findOne({ socketId: socket.id });
+            if (!currentUser) return;
+            
+            await UserModel.findOneAndUpdate(
+                { email: currentUser.email },
+                { $addToSet: { friends: senderEmail } }
+            );
+            await UserModel.findOneAndUpdate(
+                { email: senderEmail },
+                { $addToSet: { friends: currentUser.email } }
+            );
+            
+            socket.emit("friend-added", { email: senderEmail });
+            const senderSocket = this.users.find(u => u.email === senderEmail)?.socket;
+            if (senderSocket && senderSocket.connected) {
+                senderSocket.emit("friend-added", { email: currentUser.email, name: currentUser.name });
+            }
         });
 
         socket.on("disconnect-room", async () => {

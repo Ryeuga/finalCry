@@ -88,7 +88,7 @@ io.on('connection', async (socket: Socket) => {
       return;
     }
     
-    await userManager.addUser(name.trim(), socket, interests);
+    await userManager.addUser(name.trim(), email, socket, interests);
     logger.info(`User ${name} (${email}) (${socket.id}) joined`);
   });
 

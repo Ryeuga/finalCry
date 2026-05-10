@@ -177,6 +177,26 @@ export class RoomManager {
         });
     }
 
+    forwardVideoFilter(roomId: string, senderSocketId: string, filter: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) return;
+        
+        const recipient = room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
+        if (recipient && recipient.socket.connected) {
+            recipient.socket.emit("video-filter", { roomId, filter });
+        }
+    }
+
+    sendFriendRequest(roomId: string, senderSocketId: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) return;
+        const sender = room.user1.socket.id === senderSocketId ? room.user1 : room.user2;
+        const recipient = room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
+        if (recipient && recipient.socket.connected) {
+            recipient.socket.emit("receive-friend-request", { senderName: sender.name, senderEmail: sender.email });
+        }
+    }
+
     generate() {
         return GLOBAL_ROOM_ID++;
     }

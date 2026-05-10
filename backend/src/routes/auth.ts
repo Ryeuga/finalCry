@@ -115,5 +115,30 @@ router.post('/check-email', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth/friends
+ * Get user friends and requests
+ */
+router.get('/friends', async (req, res) => {
+  try {
+    const email = req.query.email as string;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const friends = await User.find({ email: { $in: user.friends || [] } })
+                              .select('name email college isVerified');
+                              
+    const requests = await User.find({ email: { $in: user.friendRequests || [] } })
+                               .select('name email college isVerified');
+
+    res.json({ friends, requests });
+  } catch (error) {
+    logger.error('Error fetching friends:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
 

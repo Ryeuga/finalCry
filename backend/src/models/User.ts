@@ -9,6 +9,8 @@ interface IUser extends Document {
   college?: string;
   createdAt: Date;
   updatedAt: Date;
+  friends: string[];
+  friendRequests: string[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -17,7 +19,9 @@ const UserSchema = new Schema<IUser>({
   socketId: { type: String },
   isVerified: { type: Boolean, default: false },
   isBanned: { type: Boolean, default: false },
-  college: { type: String }
+  college: { type: String },
+  friends: [{ type: String }],
+  friendRequests: [{ type: String }]
 }, {
   timestamps: true,
 });
