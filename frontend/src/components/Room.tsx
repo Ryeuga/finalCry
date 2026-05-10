@@ -31,8 +31,8 @@ export const Room = ({
 }) => {
     const [lobby, setLobby] = useState(true);
     const [socket, setSocket] = useState<null | Socket>(null);
-    const [sendingPc, setSendingPc] = useState<null | RTCPeerConnection>(null);
-    const [receivingPc, setReceivingPc] = useState<null | RTCPeerConnection>(null);
+    const sendingPcRef = useRef<RTCPeerConnection | null>(null);
+    const receivingPcRef = useRef<RTCPeerConnection | null>(null);
     const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -64,8 +64,8 @@ export const Room = ({
                 const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                 const screenTrack = screenStream.getVideoTracks()[0];
                 
-                if (sendingPc) {
-                    const sender = sendingPc.getSenders().find(s => s.track?.kind === 'video');
+                if (sendingPcRef.current) {
+                    const sender = sendingPcRef.current.getSenders().find(s => s.track?.kind === 'video');
                     if (sender) sender.replaceTrack(screenTrack);
                 }
                 
@@ -86,8 +86,8 @@ export const Room = ({
 
     const stopScreenShare = () => {
         if (localVideoTrack) {
-            if (sendingPc) {
-                const sender = sendingPc.getSenders().find(s => s.track?.kind === 'video');
+            if (sendingPcRef.current) {
+                const sender = sendingPcRef.current.getSenders().find(s => s.track?.kind === 'video');
                 if (sender) sender.replaceTrack(localVideoTrack);
             }
             if (localVideoRef.current) {
@@ -173,7 +173,7 @@ export const Room = ({
             const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
             const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
 
-            setSendingPc(pc);
+            sendingPcRef.current = pc;
             const localStream = new MediaStream();
             if (localVideoTrack) {
                 localStream.addTrack(localVideoTrack);
@@ -214,6 +214,7 @@ export const Room = ({
             setCurrentRoomId(roomId);
             const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
             const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
+            receivingPcRef.current = pc;
             const localStream = new MediaStream();
             if (localVideoTrack) {
                 localStream.addTrack(localVideoTrack);
@@ -226,8 +227,6 @@ export const Room = ({
             const sdp = await pc.createAnswer();
             //@ts-ignore
             pc.setLocalDescription(sdp)
-
-            setReceivingPc(pc);
             pc.ontrack = handleRemoteTrack;
 
             pc.onicecandidate = async (e) => {
@@ -252,10 +251,9 @@ export const Room = ({
 
         socket.on("answer", ({ sdp: remoteSdp }) => {
             setLobby(false);
-            setSendingPc(pc => {
-                pc?.setRemoteDescription(remoteSdp)
-                return pc;
-            });
+            if (sendingPcRef.current) {
+                sendingPcRef.current.setRemoteDescription(remoteSdp).catch(err => console.error("Error setting remote answer", err));
+            }
             console.log("loop closed");
         })
 
@@ -264,24 +262,19 @@ export const Room = ({
         })
 
         socket.on("add-ice-candidate", ({candidate, type}) => {
-            console.log("add ice candidate from remote");
-            console.log({candidate, type})
+            console.log("add ice candidate from remote", {candidate, type});
             if (type == "sender") {
-                setReceivingPc(pc => {
-                    if (!pc) {
-                        console.error("receicng pc nout found")
-                    }
-                    pc?.addIceCandidate(candidate)
-                    return pc;
-                });
+                if (receivingPcRef.current) {
+                    receivingPcRef.current.addIceCandidate(candidate).catch(err => console.error("ICE error receiver", err));
+                } else {
+                    console.error("receiving pc not found");
+                }
             } else {
-                setSendingPc(pc => {
-                    if (!pc) {
-                        console.error("sending pc nout found")
-                    }
-                    pc?.addIceCandidate(candidate)
-                    return pc;
-                });
+                if (sendingPcRef.current) {
+                    sendingPcRef.current.addIceCandidate(candidate).catch(err => console.error("ICE error sender", err));
+                } else {
+                    console.error("sending pc not found");
+                }
             }
         })
 
@@ -334,25 +327,25 @@ export const Room = ({
                 remoteVideoRef.current.srcObject = null;
             }
             // Clean up peer connections
-            if (sendingPc) {
-                sendingPc.close();
-                setSendingPc(null);
+            if (sendingPcRef.current) {
+                sendingPcRef.current.close();
+                sendingPcRef.current = null;
             }
-            if (receivingPc) {
-                receivingPc.close();
-                setReceivingPc(null);
+            if (receivingPcRef.current) {
+                receivingPcRef.current.close();
+                receivingPcRef.current = null;
             }
         }
     };
 
     const handleCancelSearch = () => {
-        if (sendingPc) {
-            sendingPc.close();
-            setSendingPc(null);
+        if (sendingPcRef.current) {
+            sendingPcRef.current.close();
+            sendingPcRef.current = null;
         }
-        if (receivingPc) {
-            receivingPc.close();
-            setReceivingPc(null);
+        if (receivingPcRef.current) {
+            receivingPcRef.current.close();
+            receivingPcRef.current = null;
         }
         setMessages([]);
         setChatInput('');
