@@ -186,7 +186,10 @@ useEffect(() => {
             <div className="landing-screen">
                 <div className="background-glow" />
                 <header className="landing-nav">
-                    <div className="brand">
+                    <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="al-pacino-container">
+                            <img src="/profile.png" alt="Face" className="al-pacino-img" />
+                        </div>
                         <div className="logo-mark">NST</div>
                         <div>
                             <p className="brand-label">Newton School of Technology</p>

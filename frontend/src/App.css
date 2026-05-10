@@ -126,6 +126,25 @@ body.room-active { height: 100vh; overflow: hidden; }
 .brand-label { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-body); }
 .brand-sub { font-size: 0.85rem; color: var(--text-muted); }
 
+/* Al Pacino Style Profile Crop */
+.al-pacino-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.al-pacino-img {
+  width: 170%; /* Make the image larger to zoom in */
+  height: 170%;
+  object-fit: cover;
+  object-position: 25% 45%; /* Shift to focus exactly on the face in the top left quadrant */
+}
+
 .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.95rem; }
 .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color 0.2s; }
 .nav-links a:hover { color: var(--brand-primary); }
