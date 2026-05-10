@@ -185,25 +185,15 @@ useEffect(() => {
         return (
             <div className="landing-screen">
                 <div className="background-glow" />
-                <header className="landing-nav">
-                    <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <header className="landing-nav" style={{ justifyContent: 'flex-start' }}>
+                    <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div className="al-pacino-container">
-                            <img src="/profile.png" alt="Face" className="al-pacino-img" />
+                            <img src="/profile.png" alt="Ryeuga Face" className="al-pacino-img" />
                         </div>
-                        <div className="logo-mark">NST</div>
                         <div>
-                            <p className="brand-label">Newton School of Technology</p>
-                            <span className="brand-sub">Campus Connect</span>
+                            <p className="brand-label" style={{ fontSize: '1.25rem' }}>Product by - Ryeuga Initiative</p>
                         </div>
                     </div>
-                    <nav className="nav-links">
-                        <a href="#community">Community</a>
-                        <a href="#events">Events</a>
-                        <a href="#safety">Safety</a>
-                    </nav>
-                    <button className="btn primary nav-cta">
-                        Launch App
-                    </button>
                 </header>
 
                 <section className="landing-hero">

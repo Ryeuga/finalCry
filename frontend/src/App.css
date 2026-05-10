@@ -128,14 +128,15 @@ body.room-active { height: 100vh; overflow: hidden; }
 
 /* Al Pacino Style Profile Crop */
 .al-pacino-container {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
   overflow: hidden;
   background-color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .al-pacino-img {
