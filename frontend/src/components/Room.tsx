@@ -46,11 +46,15 @@ export const Room = ({
     const [friendAdded, setFriendAdded] = useState(false);
     const [friendRequestSent, setFriendRequestSent] = useState(false);
     const [rtcConfig, setRtcConfig] = useState<RTCConfiguration | undefined>();
+    const rtcConfigRef = useRef<RTCConfiguration | undefined>();
 
     useEffect(() => {
         fetch(`${URL}/api/rtc-config`)
             .then(res => res.json())
-            .then(data => setRtcConfig(data.config))
+            .then(data => {
+                setRtcConfig(data.config);
+                rtcConfigRef.current = data.config;
+            })
             .catch(err => console.error("Failed to fetch RTC config", err));
     }, []);
 
@@ -167,7 +171,7 @@ export const Room = ({
             setLobby(false);
             setCurrentRoomId(roomId);
             const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-            const pc = new RTCPeerConnection(rtcConfig || defaultIce);
+            const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
 
             setSendingPc(pc);
             const localStream = new MediaStream();
@@ -209,7 +213,7 @@ export const Room = ({
             setLobby(false);
             setCurrentRoomId(roomId);
             const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-            const pc = new RTCPeerConnection(rtcConfig || defaultIce);
+            const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
             const localStream = new MediaStream();
             if (localVideoTrack) {
                 localStream.addTrack(localVideoTrack);

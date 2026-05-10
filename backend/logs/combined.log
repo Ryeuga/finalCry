@@ -653,3 +653,4 @@
 {"level":"info","message":"User TQU8SJZOIY2l3GE3AAAB removed","service":"omegle-backend","timestamp":"2026-05-10 15:22:59"}
 {"level":"warn","message":"⚠️  MongoDB disconnected","service":"omegle-backend","timestamp":"2026-05-10 16:14:11"}
 {"level":"warn","message":"⚠️  MongoDB disconnected","service":"omegle-backend","timestamp":"2026-05-10 16:39:42"}
+{"level":"warn","message":"⚠️  MongoDB disconnected","service":"omegle-backend","timestamp":"2026-05-10 18:21:23"}
