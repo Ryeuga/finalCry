@@ -188,10 +188,7 @@ useEffect(() => {
                 <header className="landing-nav" style={{ justifyContent: 'flex-start' }}>
                     <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div className="al-pacino-container">
-                            <img src="/profile.png" alt="Ryeuga Face" className="al-pacino-img" />
-                        </div>
-                        <div>
-                            <p className="brand-label" style={{ fontSize: '1.25rem' }}>Product by - Ryeuga Initiative</p>
+                            <img src="/profile.png" alt="Profile" className="al-pacino-img" />
                         </div>
                     </div>
                 </header>
