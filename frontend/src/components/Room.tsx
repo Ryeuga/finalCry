@@ -448,10 +448,17 @@ export const Room = ({
                             className={`video-card ${!isSelfEnlarged ? 'fullscreen-video' : 'pip-video'}`}
                             onClick={() => isSelfEnlarged && setIsSelfEnlarged(false)}
                         >
-                            <div className="video-meta">
-                                <h3>{lobby ? 'Searching for a match…' : 'Stranger'}</h3>
-                                <span>{lobby ? 'Hang tight, we are pairing you.' : 'You are connected'}</span>
-                            </div>
+                            {lobby ? (
+                                <div className="centered-searching-overlay">
+                                    <h3>Searching for a match...</h3>
+                                    <p>Hang tight, we are pairing you.</p>
+                                </div>
+                            ) : (
+                                <div className="video-meta">
+                                    <h3>Stranger</h3>
+                                    <span>You are connected</span>
+                                </div>
+                            )}
                             <video 
                                 autoPlay 
                                 playsInline

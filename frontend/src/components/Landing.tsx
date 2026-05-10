@@ -187,9 +187,7 @@ useEffect(() => {
                 <div className="background-glow" />
                 <header className="landing-nav" style={{ justifyContent: 'flex-start' }}>
                     <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div className="al-pacino-container">
-                            <img src="/profile.png" alt="Profile" className="al-pacino-img" />
-                        </div>
+                        <h2 style={{ margin: 0 }}>Newton Network</h2>
                     </div>
                 </header>
 

@@ -413,8 +413,40 @@ body.room-active { height: 100vh; overflow: hidden; }
 .video-meta span { color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 500; }
 .pip-video .video-meta span { font-size: 0.7rem; }
 
+.centered-searching-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 24px 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: pulse-overlay 2s infinite;
+}
+.centered-searching-overlay h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.centered-searching-overlay p {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+@keyframes pulse-overlay {
+    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+    50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
 .chat-section {
-    width: 400px;
+    width: 320px;
     height: 100vh;
     background: rgba(15, 15, 15, 0.9);
     backdrop-filter: blur(20px);
@@ -428,11 +460,11 @@ body.room-active { height: 100vh; overflow: hidden; }
 }
 
 .chat-section.retracted {
-    width: 48px;
+    width: 32px;
 }
 
 .chat-slide-btn {
-    width: 48px;
+    width: 32px;
     height: 100%;
     background: transparent;
     border: none;
@@ -457,7 +489,7 @@ body.room-active { height: 100vh; overflow: hidden; }
 }
 
 .chat-content {
-    width: 352px;
+    width: 288px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -611,11 +643,11 @@ body.room-active { height: 100vh; overflow: hidden; }
 @media (max-width: 768px) {
   .room-content { flex-direction: column; }
   .chat-section { width: 100vw; height: 50vh; }
-  .chat-section.retracted { height: 48px; width: 100vw; }
-  .chat-slide-btn { width: 100%; height: 48px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .chat-section.retracted { height: 32px; width: 100vw; }
+  .chat-slide-btn { width: 100%; height: 32px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .chat-slide-btn .chevron.flipped { transform: rotate(-90deg); }
   .chat-slide-btn .chevron { transform: rotate(90deg); }
-  .chat-content { width: 100%; height: calc(100% - 48px); }
+  .chat-content { width: 100%; height: calc(100% - 32px); }
   .pip-video {
     bottom: 80px;
     right: 20px;
