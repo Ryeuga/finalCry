@@ -172,7 +172,13 @@ export const Room = ({
             console.log("sending offer");
             setLobby(false);
             setCurrentRoomId(roomId);
-            const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+            const defaultIce = { iceServers: [
+                { urls: 'stun:stun.relay.metered.ca:80' },
+                { urls: 'turn:global.relay.metered.ca:80', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turn:global.relay.metered.ca:443', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+            ] };
             const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
 
             sendingPcRef.current = pc;
@@ -214,7 +220,13 @@ export const Room = ({
             console.log("received offer");
             setLobby(false);
             setCurrentRoomId(roomId);
-            const defaultIce = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+            const defaultIce = { iceServers: [
+                { urls: 'stun:stun.relay.metered.ca:80' },
+                { urls: 'turn:global.relay.metered.ca:80', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turn:global.relay.metered.ca:443', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: '0b9c95e48fee940d559c38e2', credential: 'XUxWEBkWH7x0jcxx' },
+            ] };
             const pc = new RTCPeerConnection(rtcConfigRef.current || defaultIce);
             receivingPcRef.current = pc;
             const localStream = new MediaStream();

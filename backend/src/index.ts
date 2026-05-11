@@ -45,12 +45,19 @@ app.get('/', (req, res) => {
 // WebRTC configuration endpoint
 app.get('/api/rtc-config', async (req, res) => {
   try {
-    const response = await fetch("https://grandnet.metered.live/api/v1/turn/credentials?apiKey=9k2m34xeXN4lhvGGv3c0rccdPszGkrcCQHIAj5q1756Tb48F");
+    const response = await fetch("https://grandnet.metered.live/api/v1/turn/credentials?apiKey=d15ae7f07a007a56a58aad91ea524d3e7456");
     const iceServers = await response.json();
     res.json({ config: { iceServers } });
   } catch (error) {
     logger.error(`Error fetching TURN credentials: ${error}`);
-    res.json({ config: getRTCConfiguration() }); // fallback to default/env STUN
+    // Hardcoded fallback TURN servers
+    res.json({ config: { iceServers: [
+      { urls: "stun:stun.relay.metered.ca:80" },
+      { urls: "turn:global.relay.metered.ca:80", username: "0b9c95e48fee940d559c38e2", credential: "XUxWEBkWH7x0jcxx" },
+      { urls: "turn:global.relay.metered.ca:80?transport=tcp", username: "0b9c95e48fee940d559c38e2", credential: "XUxWEBkWH7x0jcxx" },
+      { urls: "turn:global.relay.metered.ca:443", username: "0b9c95e48fee940d559c38e2", credential: "XUxWEBkWH7x0jcxx" },
+      { urls: "turns:global.relay.metered.ca:443?transport=tcp", username: "0b9c95e48fee940d559c38e2", credential: "XUxWEBkWH7x0jcxx" },
+    ] } });
   }
 });
 
