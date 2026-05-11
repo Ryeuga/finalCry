@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 // WebRTC configuration endpoint
 app.get('/api/rtc-config', async (req, res) => {
   try {
-    const response = await fetch("https://gradnet.metered.live/api/v1/turn/credentials?apiKey=80c328f8880136ec24922d118e3242fac3ef");
+    const response = await fetch("https://grandnet.metered.live/api/v1/turn/credentials?apiKey=9k2m34xeXN4lhvGGv3c0rccdPszGkrcCQHIAj5q1756Tb48F");
     const iceServers = await response.json();
     res.json({ config: { iceServers } });
   } catch (error) {
